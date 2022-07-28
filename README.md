@@ -68,3 +68,246 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+index.css
+1. Always write common styles in index.css
+2.body { margin :0,padding :0;width:100vw;font-family:""}
+    *{
+        box-sizing:border-box;
+    }
+    html{
+        font-size:100%;
+        observe it is %
+    }
+    :root{
+        --nav-height:6rem;
+        page-heiht{
+            min-height:calc(100vh - var(--nav-height))
+        }
+        .full-page-height{
+            min-height:100vh;
+        }
+    }
+
+very imp
+  <nav className="nav">
+        <div className="nav-container">
+        <img src={logo} className="logo" />
+        </div>
+      </nav>
+
+2.styled-components allow us to avoid same classname collisions(because each component has unique id if you create two buttons with same classname in diff components but they will have unique class name in dom representation and unique id's) if you use normal css then you will definitely face this problem 
+we can pass js login like props to css
+
+
+
+import React, { useState, useEffect } from 'react';
+import styles from '../styles/layout.module.scss';
+import Link from 'next/link';
+import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
+import SidebarLinks from '../jsondata/sidebar-links.json';
+
+const Layout = (props) => {
+	const [ sidebarOpened, setSidebarOpened ] = useState(true);
+	const [ windowWidth, setWindowWidth ] = useState(null);
+
+	const router = useRouter();
+
+	useEffect(() => {
+		let user = Cookies.get('user');
+		if (!user) router.replace('/');
+
+		handleResize();
+		window.addEventListener('resize', handleResize);
+	}, []);
+
+	useEffect(
+		() => {
+			if (windowWidth < 576) setSidebarOpened(false);
+			else setSidebarOpened(true);
+		},
+		[ windowWidth ]
+	);
+
+	const handleResize = () => setWindowWidth(window.innerWidth);
+
+	const handleSidebar = () => {
+		setSidebarOpened(!sidebarOpened);
+	};
+
+	const handleLogout = () => {
+		Cookies.remove('user');
+		router.replace('/');
+	};
+
+	return (
+		<div className={styles.mainContainer + ' ' + (sidebarOpened ? styles.sidebarOpened : '')}>
+			<div className={styles.sidebarContainer}>
+				<div className={styles.sidebarHeader}>
+					{sidebarOpened && (
+						<p>
+							<span>MyBiz</span>
+							<span className="ms-1">Flyers</span>
+						</p>
+					)}
+					<div
+						className={styles.sidebarCircle + ' ' + (windowWidth < 576 ? styles.clickDisabled : '')}
+						onClick={handleSidebar}
+					>
+						{sidebarOpened ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+					</div>
+				</div>
+				<div className={styles.sidebarItemContainer}>
+					{SidebarLinks.map((link, index) => (
+						<Link key={index} className={styles.sidebarItemTitle} href={link.path}>
+							{link.title}
+						</Link>
+					))}
+				</div>
+			</div>
+
+			<div className={styles.contentContainer}>
+				<div className={styles.topbar}>
+					{windowWidth >= 576 && <div />}
+					<h3 className="m-0">{props.title}</h3>
+					<p onClick={handleLogout}>Logout</p>
+				</div>
+				<div className={styles.mainContent}>{props.children}</div>
+			</div>
+		</div>
+	);
+};
+export default Layout;
+
+
+@import "./variables.module.scss";
+.mainContainer{
+	width:100vw;
+	height:100vh;
+	display: flex;
+}
+.sidebarContainer {
+	background-color: rgb(50, 50, 70);
+	width: 80px;
+	height:100%;
+	transition:width 0.2s ease-out;
+}
+.sidebarContainer .sidebarHeader {
+	padding: 20px 14px;
+	height: 73px;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-bottom: 1px solid #656565;
+}
+.sidebarHeader p {
+	margin: 0;
+	font-size: 1.2rem;
+}
+.sidebarHeader p span {
+	display: inline-block;
+}
+.sidebarHeader p span::first-letter {
+	color: $secondary-color;
+}
+.sidebarHeader .sidebarCircle {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: 2px solid white;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	cursor: pointer;
+}
+.sidebarHeader .sidebarCircle.clickDisabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+.sidebarHeader svg { 
+	font-size: 2rem;
+}
+.sidebarItemContainer {
+	padding: 20px 0px;
+	margin-top: 10px;
+	display: flex;
+	flex-direction: column;
+}
+.sidebarItemContainer a {
+	padding: 10px 10px;
+    text-decoration: none;
+    color: white;
+    background: #484855;
+    margin-bottom: 15px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+	font-size: 16px;
+    font-weight: 300;
+}
+.sidebarItemContainer a:hover {
+	background: $primary-color;
+}
+.sidebarOpened .sidebarContainer {
+	width: 220px;
+}
+.sidebarOpened .sidebarContainer .sidebarHeader {
+	justify-content: space-between;
+}
+.sidebarOpened .sidebarItemContainer a {
+	padding: 10px 20px;
+	font-size: 17px;
+}
+.contentContainer {
+	width: calc(100% - 80px);
+	color: red;
+}
+.sidebarOpened .contentContainer {
+	width: calc(100% - 220px);
+}
+.contentContainer .topbar {
+	height: 73px;
+	background-color: $secondary-color;
+	padding: 0px 20px;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.contentContainer .topbar h3 {
+	font-size: 21px;
+}
+.contentContainer .topbar p {
+	margin: 0;
+	cursor: pointer;
+	font-size: 15px;
+}
+.mainContent {
+	padding: 10px;
+    height: calc(100% - 73px);
+    overflow-y: auto;
+	background-color: #f8f9fa;
+}
+@media only screen and (min-width: 576px) {
+	.contentContainer .topbar h3 {
+		font-size: 24px;
+	}
+	.contentContainer .topbar p {
+		font-size: 16px;
+	}
+	.mainContent {
+		padding: 20px;
+	}
+}
+@media only screen and (min-width: 992px) {
+	.contentContainer .topbar h3 {
+		font-size: 28px;
+	}
+	.mainContent {
+		padding: 30px;
+	}
+}

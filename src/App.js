@@ -1,24 +1,47 @@
-import logo from './logo.svg';
-import './App.css';
+import Landing from "./pages/Landing";
 
+import Register from "./pages/Register";
+import ErrorPage from "./pages/ErrorPage";
+import ProtectedRoute from "./pages/ProtectedRoute";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+
+import Alert from "./components/Alert";
+import { useSelector } from "react-redux";
+import SharedLayout from "./pages/dashboard/SharedLayout";
+import AllJobs from "./pages/dashboard/AllJobs";
+import AddJob from "./pages/dashboard/AddJob";
+import Profile from "./pages/dashboard/Profile";
+import Stats from "./pages/dashboard/Stats";
+import { useEffect } from "react";
+import { handleCloseToast } from "./redux/toast/toastSlice";
 function App() {
+  const { openToast } = useSelector((state) => state.toast);
+
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <BrowserRouter>
+      {openToast && <Alert />}
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <SharedLayout />
+            </ProtectedRoute>
+          }
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Route index element={<Stats />} />
+          <Route path="all-jobs" element={<AllJobs />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="add-job" element={<AddJob />} />
+        </Route>
+
+        <Route path="/landing" element={<Landing />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
